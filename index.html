@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Be My Plus One Crossword</title>
+<style>
+:root {
+  --pink:#ff75a8;
+  --pink2:#ffd7e7;
+  --rose:#fff2f7;
+  --ink:#26212a;
+  --muted:#6c5d67;
+  --paper:#fffdfd;
+  --black:#1f1b22;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family: ui-rounded, "Avenir Next", Arial, sans-serif;
+  color:var(--ink);
+  background: radial-gradient(circle at top, #fff7fb 0%, #ffffff 50%, #fff0f6 100%);
+}
+.page {
+  max-width:1120px;
+  margin:0 auto;
+  padding:28px 16px 60px;
+}
+.hero {
+  text-align:center;
+  padding:12px 8px 24px;
+}
+h1 {
+  margin:0;
+  font-size:clamp(28px, 5vw, 48px);
+  letter-spacing:-.045em;
+}
+.sub {
+  margin:10px auto 0;
+  max-width:700px;
+  color:var(--muted);
+}
+.layout {
+  display:grid;
+  grid-template-columns:minmax(330px, 560px) minmax(280px, 1fr);
+  gap:24px;
+  align-items:start;
+}
+@media (max-width:900px) {
+  .layout { grid-template-columns:1fr; }
+}
+.card {
+  background:rgba(255,255,255,.94);
+  border:2px solid #f3c3d5;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 14px 30px rgba(148,63,100,.12);
+}
+.grid-scroll { overflow-x:auto; padding-bottom:4px; }
+#grid {
+  display:grid;
+  grid-template-columns:repeat(13, 34px);
+  grid-template-rows:repeat(12, 34px);
+  gap:2px;
+  justify-content:center;
+  min-width:calc(13 * 36px);
+  margin:auto;
+}
+.cell {
+  width:34px;
+  height:34px;
+  position:relative;
+}
+.block {
+  background:var(--black);
+  border-radius:3px;
+}
+.cell input {
+  width:34px;
+  height:34px;
+  border:1.3px solid #8e7b85;
+  border-radius:2px;
+  text-align:center;
+  font-size:19px;
+  line-height:34px;
+  font-weight:800;
+  text-transform:uppercase;
+  background:var(--paper);
+  color:var(--ink);
+  caret-color:var(--pink);
+}
+.cell input:focus {
+  outline:3px solid var(--pink2);
+  border-color:var(--pink);
+  z-index:5;
+}
+.num {
+  position:absolute;
+  top:1px;
+  left:2px;
+  font-size:8px;
+  line-height:8px;
+  font-weight:900;
+  color:#55424d;
+  z-index:4;
+  pointer-events:none;
+}
+
+.reveal::before {
+  content: attr(data-reveal-label);
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: white;
+  font-size: 8px;
+  line-height: 12px;
+  font-weight: 900;
+  text-align: center;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.actions {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+button {
+  border:0;
+  border-radius:999px;
+  padding:11px 16px;
+  background:var(--pink);
+  color:white;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(255,117,168,.34);
+}
+button.secondary {
+  background:#f6e7ee;
+  color:#6d324b;
+  box-shadow:none;
+}
+#status {
+  min-height:26px;
+  margin-top:12px;
+  font-weight:800;
+  color:#8d4a64;
+}
+#meta, #final {
+  display:none;
+  margin-top:16px;
+  border-radius:16px;
+}
+#meta {
+  padding:14px;
+  background:var(--rose);
+  border:1.5px dashed #e58cad;
+}
+#final {
+  padding:22px;
+  background:linear-gradient(135deg, #fff1f7, #fffdfd);
+  border:2px solid var(--pink);
+  text-align:center;
+}
+#final h2 {
+  font-size:30px;
+  margin:0 0 8px;
+}
+.checkboxes {
+  display:inline-block;
+  text-align:left;
+  font-size:20px;
+  line-height:1.8;
+}
+.dir {
+  margin:6px 0 8px;
+  font-size:18px;
+  color:#bd3f76;
+  font-weight:900;
+}
+ol {
+  margin-top:0;
+  padding-left:26px;
+}
+li {
+  margin:10px 0;
+}
+.note {
+  margin-top:12px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+#builder {
+  display: block;
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff7fb;
+  border: 2px solid #f3c3d5;
+  border-radius: 16px;
+}
+.tile-area, .answer-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 48px;
+  padding: 10px;
+  border-radius: 12px;
+}
+.tile-area {
+  background: white;
+  border: 1.5px dashed #e58cad;
+}
+.answer-area {
+  background: #fff1f7;
+  border: 2px solid #ff75a8;
+  margin-top: 10px;
+}
+.tile {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ff75a8;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 5px 12px rgba(255,117,168,.25);
+}
+.space-tile {
+  width: 20px;
+  background: #f6e7ee;
+  color: #6d324b;
+}
+#builderStatus {
+  margin-top: 10px;
+  font-weight: 800;
+  color: #8d4a64;
+}
+
+
+.word-pattern {
+  margin-top: 10px;
+  font-weight: 900;
+  color: #8d4a64;
+}
+.blank-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+.word-slot {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.blank {
+  width: 32px;
+  height: 38px;
+  border-bottom: 3px solid #8d4a64;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.blank .tile {
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  box-shadow: none;
+}
+.tile.selected {
+  outline: 3px solid #8d4a64;
+}
+
+
+.tile.dragging {
+  opacity: 0.55;
+}
+.blank.drag-over {
+  background: #ffe3ef;
+  border-bottom-color: #ff75a8;
+}
+.tile-area.drag-over {
+  background: #fff1f7;
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>A Crossword for the Guy Who Makes Me Cross My Words</h1>
+    <p class="sub">Fill the interlocking grid. The numbered pink circles reveal a message in order, and the puzzle has to be correct before it reveals itself.</p>
+  </section>
+
+  <main class="layout">
+    <section class="card">
+      <div class="grid-scroll">
+        <div id="grid" aria-label="crossword grid"></div>
+      </div>
+      <div class="actions">
+        <button onclick="checkGrid()">Check puzzle</button>
+        <button class="secondary" onclick="clearGrid()">Clear</button>
+        <button class="secondary" onclick="toggleRevealHint()">Show/hide reveal numbers</button>
+      </div>
+      <div id="status"></div>
+      <div id="meta"></div>
+      <div id="builder">
+        <strong>Secret message:</strong>
+        <p class="note">As you fill the marked squares in the crossword, the message below fills in automatically.</p>
+        <div id="autoReveal" class="blank-row" aria-label="secret message auto reveal"></div>
+        <div id="builderStatus"></div>
+      </div>
+
+      <div id="final">
+        <h2>💌 BE MY PLUS ONE?</h2>
+        <p>You took a leap of faith, survived scuba diving, and solved this puzzle.</p>
+        <p>I can't wait to introduce you to my friends and dance the night away.</p>
+        <p><strong>Will you join me in Portland (Oregon, not Maine)?</strong></p>
+        <div class="checkboxes">☐ Yes<br>☐ Also yes</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="dir">Across</div>
+      <ol>
+        <li value="1">The correct response to patacones con Imperial?</li><li value="3">A Costa Rican town that sounds suspiciously like the ingredient that belongs in everyone else’s dal.</li><li value="8">One of the seven deadly sins... and apparently your fursona.</li><li value="10">The body of water where we logged many hours of meritorious strolling.</li><li value="11">Before there was “us,” there was an algorithm that got unusually lucky.</li><li value="12">The sense we unintentionally sacrificed to the scuba gods.</li>
+      </ol>
+      <div class="dir">Down</div>
+      <ol>
+        <li value="2">Tiny creatures for whom we provide highly accurate prehistoric vocalizations.</li><li value="4">He asked us to sing a song tonight.</li><li value="5">The alter egos who emerge when it’s much too late to still be awake.</li><li value="6">We definitely did not skinny dip in this, though we have spent plenty of time playing it.</li><li value="7">The month in which I apparently celebrate my birthday in your alternate reality.</li><li value="9">The hungriest resident at the Garden of Eden.</li>
+      </ol>
+      <p class="note">Spaces do not matter. For example, type multi-word answers as one continuous answer.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+const ROWS = 12;
+const COLS = 13;
+const solution = {"7_0": "L", "7_1": "A", "7_2": "K", "7_3": "E", "7_4": "M", "7_5": "E", "7_6": "R", "7_7": "R", "7_8": "I", "7_9": "T", "7_10": "T", "4_0": "P", "5_0": "O", "6_0": "O", "6_8": "B", "8_8": "L", "9_8": "L", "10_8": "I", "3_10": "G", "4_10": "H", "5_10": "O", "6_10": "S", "0_6": "D", "1_6": "I", "2_6": "N", "3_6": "O", "4_6": "S", "5_6": "A", "6_6": "U", "0_0": "P", "0_1": "U", "0_2": "R", "0_3": "A", "0_4": "V", "0_5": "I", "0_7": "A", "4_3": "D", "5_3": "E", "6_3": "C", "8_3": "M", "9_3": "B", "10_3": "E", "11_3": "R", "10_7": "D", "10_9": "L", "10_10": "M", "10_11": "I", "10_12": "L", "2_0": "T", "2_1": "A", "2_2": "M", "2_3": "A", "2_4": "R", "2_5": "I", "2_7": "D", "2_8": "O", "11_0": "H", "11_1": "E", "11_2": "A", "11_4": "I", "11_5": "N", "11_6": "G", "4_7": "L", "4_8": "O", "4_9": "T", "2_12": "B", "3_12": "I", "4_12": "L", "5_12": "L", "6_12": "Y", "7_12": "J", "8_12": "O", "9_12": "E"};
+const numbers = {"0_0": 1, "0_6": 2, "2_0": 3, "2_12": 4, "3_10": 5, "4_0": 6, "4_3": 7, "4_6": 8, "6_8": 9, "7_0": 10, "10_7": 11, "11_0": 12};
+const revealLabels = ['1','2','3','4','5','6','7','8','9','10','11'];
+const revealCells = ["6_8", "7_3", "7_4", "6_12", "0_0", "7_0", "0_1", "6_10", "5_10", "2_6", "7_5"];
+const grid = document.getElementById("grid");
+let revealHint = true;
+
+function makeGrid() {
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const key = `${r}_${c}`;
+      const div = document.createElement("div");
+      div.className = "cell";
+      if (!solution[key]) {
+        div.classList.add("block");
+      } else {
+        if (revealCells.includes(key)) {
+          div.classList.add("reveal");
+          div.dataset.revealLabel = revealLabels[revealCells.indexOf(key)];
+        }
+        if (numbers[key]) {
+          const n = document.createElement("span");
+          n.className = "num";
+          n.textContent = numbers[key];
+          div.appendChild(n);
+        }
+        const input = document.createElement("input");
+        input.maxLength = 1;
+        input.autocapitalize = "characters";
+        input.autocomplete = "off";
+        input.spellcheck = false;
+        input.dataset.key = key;
+        input.dataset.r = r;
+        input.dataset.c = c;
+        input.addEventListener("input", e => {
+          e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+          updateAutoReveal();
+          if (e.target.value) moveNext(r, c);
+        });
+        input.addEventListener("keydown", e => {
+          if (e.key === "Backspace" && !e.target.value) {
+            movePrev(r, c);
+          }
+          if (e.key === "ArrowRight") { e.preventDefault(); moveDir(r,c,0,1); }
+          if (e.key === "ArrowLeft") { e.preventDefault(); moveDir(r,c,0,-1); }
+          if (e.key === "ArrowDown") { e.preventDefault(); moveDir(r,c,1,0); }
+          if (e.key === "ArrowUp") { e.preventDefault(); moveDir(r,c,-1,0); }
+        });
+        div.appendChild(input);
+      }
+      grid.appendChild(div);
+    }
+  }
+}
+
+function inputAt(r,c) {
+  return document.querySelector(`input[data-key="${r}_${c}"]`);
+}
+
+function moveDir(r,c,dr,dc) {
+  let rr = r + dr, cc = c + dc;
+  while (rr >= 0 && rr < ROWS && cc >= 0 && cc < COLS) {
+    let el = inputAt(rr, cc);
+    if (el) { el.focus(); return; }
+    rr += dr; cc += dc;
+  }
+}
+
+function moveNext(r,c) {
+  for (let cc = c + 1; cc < COLS; cc++) {
+    let el = inputAt(r, cc);
+    if (el) { el.focus(); return; }
+  }
+  for (let rr = r + 1; rr < ROWS; rr++) {
+    for (let cc = 0; cc < COLS; cc++) {
+      let el = inputAt(rr, cc);
+      if (el) { el.focus(); return; }
+    }
+  }
+}
+
+function movePrev(r,c) {
+  for (let cc = c - 1; cc >= 0; cc--) {
+    let el = inputAt(r, cc);
+    if (el) { el.focus(); return; }
+  }
+  for (let rr = r - 1; rr >= 0; rr--) {
+    for (let cc = COLS - 1; cc >= 0; cc--) {
+      let el = inputAt(rr, cc);
+      if (el) { el.focus(); return; }
+    }
+  }
+}
+
+function checkGrid() {
+  let wrong = 0;
+  let empty = 0;
+  document.querySelectorAll("input").forEach(inp => {
+    const correct = solution[inp.dataset.key];
+    inp.style.background = "var(--paper)";
+    if (!inp.value) {
+      empty++;
+    } else if (inp.value.toUpperCase() !== correct) {
+      wrong++;
+      inp.style.background = "#fff0f0";
+    } else {
+      inp.style.background = "#eafff0";
+    }
+  });
+  const status = document.getElementById("status");
+  const meta = document.getElementById("meta");
+  const final = document.getElementById("final");
+  const builder = document.getElementById("builder");
+
+  if (empty || wrong) {
+    status.textContent = empty
+      ? `Almost there: ${empty} empty square(s), ${wrong} typo(s).`
+      : `So close: ${wrong} square(s) need fixing.`;
+    meta.style.display = "none";
+    final.style.display = "none";
+    builder.style.display = "none";
+    return;
+  }
+
+  const hidden = revealCells.map(k => document.querySelector(`input[data-key="${k}"]`).value).join("");
+  status.textContent = "Perfect. The secret message is complete.";
+  meta.style.display = "block";
+  meta.innerHTML = `<strong>Secret message complete:</strong> BE MY PLUS ONE?`;
+  builder.style.display = "block";
+  setupBuilder();
+  updateAutoReveal();
+  builder.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function clearGrid() {
+  document.querySelectorAll("input").forEach(inp => {
+    inp.value = "";
+    inp.style.background = "var(--paper)";
+  });
+  document.getElementById("status").textContent = "";
+  document.getElementById("meta").style.display = "none";
+  document.getElementById("final").style.display = "none";
+  document.getElementById("builder").style.display = "block";
+  setupBuilder();
+}
+
+function toggleRevealHint() {
+  revealHint = !revealHint;
+  document.querySelectorAll(".cell").forEach(cell => {
+    if (cell.classList.contains("reveal")) {
+      cell.style.setProperty("--showReveal", revealHint ? "1" : "0");
+      cell.classList.toggle("reveal", revealHint);
+      if (!revealHint) cell.dataset.wasReveal = "1";
+    } else if (cell.dataset.wasReveal === "1" && revealHint) {
+      cell.classList.add("reveal");
+      delete cell.dataset.wasReveal;
+    }
+  });
+}
+
+
+
+
+
+const targetMessage = "BEMYPLUSONE";
+const displayTarget = "BE MY PLUS ONE?";
+const wordLengths = [2, 2, 4, 3];
+
+function setupBuilder() {
+  const reveal = document.getElementById("autoReveal");
+  const builderStatus = document.getElementById("builderStatus");
+  reveal.innerHTML = "";
+  builderStatus.textContent = "The blanks will fill in from the marked crossword squares.";
+
+  let idx = 0;
+  wordLengths.forEach((len) => {
+    const word = document.createElement("div");
+    word.className = "word-slot";
+    for (let i = 0; i < len; i++) {
+      const blank = document.createElement("div");
+      blank.className = "blank";
+      blank.dataset.index = String(idx);
+      blank.textContent = "";
+      word.appendChild(blank);
+      idx++;
+    }
+    reveal.appendChild(word);
+  });
+
+  updateAutoReveal();
+}
+
+function updateAutoReveal() {
+  const blanks = Array.from(document.querySelectorAll("#autoReveal .blank"));
+  const letters = revealCells.map(k => {
+    const input = document.querySelector(`input[data-key="${k}"]`);
+    return input ? input.value.toUpperCase() : "";
+  });
+
+  blanks.forEach((blank, i) => {
+    blank.textContent = letters[i] || "";
+  });
+
+  const current = letters.join("");
+  const filled = letters.filter(Boolean).length;
+  const builderStatus = document.getElementById("builderStatus");
+  const final = document.getElementById("final");
+
+  if (current === targetMessage) {
+    builderStatus.textContent = "Secret message revealed: " + displayTarget;
+    final.style.display = "block";
+  } else {
+    builderStatus.textContent = `${filled}/${targetMessage.length} secret-message letters revealed.`;
+    final.style.display = "none";
+  }
+}
+
+makeGrid();
+setupBuilder();
+</script>
+</body>
+</html>
