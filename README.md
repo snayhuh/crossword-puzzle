@@ -1,6 +1,6 @@
 # 💌 A Crossword for the Guy Who Makes Me Cross My Words
 
-### A little wordplay. A lot of heart. One hidden question.
+### It's an adult promposal!
 
 An interactive, personalized crossword that turns shared memories and inside jokes into a surprise invitation.
 
