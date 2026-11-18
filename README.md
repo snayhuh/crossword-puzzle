@@ -19,7 +19,7 @@ An interactive, personalized crossword that turns shared memories and inside jok
 
 Some questions are more fun when you have to work for the answer.
 
-This project began as a way to turn favorite memories, running jokes, and little moments into a crossword puzzle with a twist. Every clue is personal. A few special squares contain letters that come together to reveal a secret message—and solving the puzzle unlocks the final surprise.
+This project began as a way to turn favorite memories, running jokes, and little moments into a crossword puzzle to ask my partner a question. Each clue is personal. A few special squares contain letters that come together to reveal a secret message—and solving the puzzle unlocks the final surprise.
 
 It's part crossword, part digital love note, and entirely built from scratch.
 
